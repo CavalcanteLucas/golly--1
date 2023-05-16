@@ -1,40 +1,75 @@
-import { createElement } from "react";
+class MyBoard {
+  size: number;
+  board: { x: number; y: number; state: boolean }[][];
 
+  constructor(size = 10) {
+    this.size = size;
+    this.board = [];
 
-let cell = <td className="cell"></td>
+    for (let i = 0; i < size; i++) {
+      let row = [];
 
-function Row({ size=10 }) {
+      for (let j = 0; j < size; j++) {
+        row.push({ x: i, y: j, state: false });
+      }
 
-  let row = [];
-  for (let i = 0; i < size; i++) {
-    row.push(
-      cell
-    )
+      this.board.push(row);
+    }
   }
-  return <>{row}</>;
+
+  getBoard() {
+    return this.board;
+  }
+
+  getCell(x: number, y: number) {
+    return this.board[x][y];
+  }
+
+  setCellOn(x: number, y: number) {
+    this.board[x][y].state = true;
+  }
+
+  setCellOff(x: number, y: number) {
+    this.board[x][y].state = false;
+  }
 }
 
-function Board({ size=10 }) {
+function BoardComponent() {
+  let board = new MyBoard(10);
 
-  let board = [];
-  for (let i = 0; i < size; i++) {
-    board.push(      
-      <tr><Row size={size}/></tr>
-    )
-  }
-  return <>{board}</>;
+  board.setCellOn(1, 2);
+  board.setCellOn(5, 8);
+
+  return (
+    <table className="board">
+      <tbody>
+        {board.getBoard().map((row, rowIndex) => (
+          <tr key={rowIndex}>
+            {row.map((cell, cellIndex) =>
+              cell.state ? (
+                <td className="cell-on" key={cellIndex}>
+                  {cell.x}
+                  {cell.y}
+                </td>
+              ) : (
+                <td className="cell-off" key={cellIndex}>
+                  {cell.x}
+                  {cell.y}
+                </td>
+              )
+            )}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 }
 
 export default function Home() {
-
-  let tbody = <tbody><Board size={10}/></tbody>
-
-  let table = <table className="board">{tbody}</table>
-
   return (
     <main>
       <div className="content">
-        {table}
+        <BoardComponent />
       </div>
     </main>
   );
