@@ -1,20 +1,30 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+
 class MyBoard {
   size: number;
-  board: { x: number; y: number; state: boolean }[][];
+  board: Array<Array<{x: number; y: number; state: boolean}>>;
 
-  constructor(size = 10) {
+  constructor(size = 10, initialBoard?: MyBoard) {
     this.size = size;
-    this.board = [];
+    this.board = initialBoard ? initialBoard.board : this.initializeBoard();
+  }
 
-    for (let i = 0; i < size; i++) {
+  initializeBoard() {
+    const board = [];
+
+    for (let i = 0; i < this.size; i++) {
       let row = [];
 
-      for (let j = 0; j < size; j++) {
+      for (let j = 0; j < this.size; j++) {
         row.push({ x: i, y: j, state: false });
       }
 
-      this.board.push(row);
+      board.push(row);
     }
+
+    return board;
   }
 
   getBoard() {
@@ -32,13 +42,20 @@ class MyBoard {
   setCellOff(x: number, y: number) {
     this.board[x][y].state = false;
   }
+
+  toggleCell(x: number, y: number) {
+    this.board[x][y].state = !this.board[x][y].state;
+  }
 }
 
 function BoardComponent() {
-  let board = new MyBoard(10);
+  const [board, setBoard] = useState(new MyBoard(10));
 
-  board.setCellOn(1, 2);
-  board.setCellOn(5, 8);
+  const handleCellClick = (x: number, y: number) => {
+    const newBoard = new MyBoard(board.size, board);
+    newBoard.toggleCell(x, y);
+    setBoard(newBoard);
+  };
 
   return (
     <table className="board">
@@ -47,12 +64,20 @@ function BoardComponent() {
           <tr key={rowIndex}>
             {row.map((cell, cellIndex) =>
               cell.state ? (
-                <td className="cell-on" key={cellIndex}>
+                <td
+                  onClick={() => handleCellClick(cell.x, cell.y)}
+                  className="cell-on"
+                  key={cellIndex}
+                >
                   {cell.x}
                   {cell.y}
                 </td>
               ) : (
-                <td className="cell-off" key={cellIndex}>
+                <td
+                  className="cell-off"
+                  onClick={() => handleCellClick(cell.x, cell.y)}
+                  key={cellIndex}
+                >
                   {cell.x}
                   {cell.y}
                 </td>
@@ -65,10 +90,31 @@ function BoardComponent() {
   );
 }
 
+function ClockComponent() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount((oldCount) => oldCount + 1);
+    }, 1000);
+
+    return () => {
+      clearInterval(id);
+    };
+  }, []);
+
+  return (
+    <>
+      <div>Current time: {count}</div>
+    </>
+  );
+}
+
 export default function Home() {
   return (
     <main>
       <div className="content">
+        <ClockComponent />
         <BoardComponent />
       </div>
     </main>
