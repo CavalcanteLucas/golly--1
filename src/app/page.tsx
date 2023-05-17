@@ -69,13 +69,19 @@ class MyBoard {
 
   computeNextTurn() {
     const newBoard = this.initializeBoard();
-
     for (let i = 0; i < this.size; i++) {
       for (let j = 0; j < this.size; j++) {
         if (this.board[i][j].state) {
-          newBoard[i][j] = { x: i, y: j, state: false };
+          if (this.countAliveNeighbours(i, j) < 2 || this.countAliveNeighbours(i, j) > 3) {
+            newBoard[i][j] = { x: i, y: j, state: false };
+          }
+          if (this.countAliveNeighbours(i, j) === 2 || this.countAliveNeighbours(i, j) === 3) {
+            newBoard[i][j] = { x: i, y: j, state: true };
+          }
         } else {
-          newBoard[i][j] = { x: i, y: j, state: true };
+          if (this.countAliveNeighbours(i, j) === 3) {
+            newBoard[i][j] = { x: i, y: j, state: true };
+          }
         }
       }
     }
@@ -85,7 +91,7 @@ class MyBoard {
 }
 
 function BoardComponent() {
-  const [board, setBoard] = useState(new MyBoard(10));
+  const [board, setBoard] = useState(new MyBoard(100));
 
   const handleCellClick = (x: number, y: number) => {
     const newBoard = new MyBoard(board.size, board);
@@ -102,8 +108,8 @@ function BoardComponent() {
     if (!paused) {
       turn = setInterval(() => {
         setCount((oldCount) => oldCount + 1);
-        // board.computeNextTurn();
-      }, 1000);
+        board.computeNextTurn();
+      }, 100);
     }
 
     return () => {
@@ -128,9 +134,7 @@ function BoardComponent() {
                     className="cell cell-on"
                     key={cellIndex}
                   >
-                    {board.countAliveNeighbours(cell.x, cell.y)}
-                    {/* {cell.x}
-                    {cell.y} */}
+                    {/* {board.countAliveNeighbours(cell.x, cell.y)} */}
                   </td>
                 ) : (
                   <td
@@ -138,8 +142,7 @@ function BoardComponent() {
                     onClick={() => handleCellClick(cell.x, cell.y)}
                     key={cellIndex}
                   >
-                    {cell.x}
-                    {cell.y}
+                    {/* {cell.x}{cell.y} */}
                   </td>
                 )
               )}
@@ -147,8 +150,10 @@ function BoardComponent() {
           ))}
         </tbody>
       </table>
-      <div>Current turn: {count}</div>
-      <button onClick={handlePause}>{paused ? "Resume" : "Pause"}</button>
+      <div className="turn-counter-box">
+        <p>Current turn: {count}</p>
+        <button onClick={handlePause}>{paused ? "Resume" : "Pause"}</button>
+      </div>
     </>
   );
 }

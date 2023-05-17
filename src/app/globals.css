@@ -21,8 +21,8 @@ body {
 }
 
 .cell {
-  height: 20px;
-  width: 20px;
+  height: 5px;
+  width: 5px;
 }
 
 .cell-off {
@@ -33,4 +33,10 @@ body {
 .cell-on {
   background-color: black;
   color: white;
+}
+
+.turn-counter-box {
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
 }
