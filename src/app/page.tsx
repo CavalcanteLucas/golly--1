@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 
 class MyBoard {
   size: number;
-  board: Array<Array<{x: number; y: number; state: boolean}>>;
+  board: Array<Array<{ x: number; y: number; state: boolean }>>;
 
   constructor(size = 10, initialBoard?: MyBoard) {
     this.size = size;
@@ -90,22 +90,32 @@ function BoardComponent() {
   );
 }
 
-function ClockComponent() {
+function TurnCounter() {
   const [count, setCount] = useState(0);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setCount((oldCount) => oldCount + 1);
-    }, 1000);
+    let turn: NodeJS.Timeout;
+
+    if (!paused) {
+      turn = setInterval(() => {
+        setCount((oldCount) => oldCount + 1);
+      }, 1000);
+    }
 
     return () => {
-      clearInterval(id);
+      clearInterval(turn);
     };
-  }, []);
+  }, [paused]);
+
+  const handlePause = () => {
+    setPaused(!paused);
+  };
 
   return (
     <>
-      <div>Current time: {count}</div>
+      <div>Current turn: {count}</div>
+      <button onClick={handlePause}>{paused ? "Resume" : "Pause"}</button>
     </>
   );
 }
@@ -114,8 +124,8 @@ export default function Home() {
   return (
     <main>
       <div className="content">
-        <ClockComponent />
         <BoardComponent />
+        <TurnCounter />
       </div>
     </main>
   );
