@@ -46,6 +46,42 @@ class MyBoard {
   toggleCell(x: number, y: number) {
     this.board[x][y].state = !this.board[x][y].state;
   }
+
+  countAliveNeighbours(x: number, y: number) {
+    let aliveNeighbours = 0;
+    for (let i = x - 1; i < x + 2; i++) {
+      for (let j = y - 1; j < y + 2; j++) {
+        if (
+          i >= 0 &&
+          i < this.size &&
+          j >= 0 &&
+          j < this.size &&
+          !(i === x && j === y)
+          ) {
+          if (this.board[i][j].state) {
+            aliveNeighbours++;
+          }
+        }
+      }
+    }
+    return aliveNeighbours;
+  }
+
+  computeNextTurn() {
+    const newBoard = this.initializeBoard();
+
+    for (let i = 0; i < this.size; i++) {
+      for (let j = 0; j < this.size; j++) {
+        if (this.board[i][j].state) {
+          newBoard[i][j] = { x: i, y: j, state: false };
+        } else {
+          newBoard[i][j] = { x: i, y: j, state: true };
+        }
+      }
+    }
+
+    this.board = newBoard;
+  }
 }
 
 function BoardComponent() {
@@ -57,42 +93,8 @@ function BoardComponent() {
     setBoard(newBoard);
   };
 
-  return (
-    <table className="board">
-      <tbody>
-        {board.getBoard().map((row, rowIndex) => (
-          <tr key={rowIndex}>
-            {row.map((cell, cellIndex) =>
-              cell.state ? (
-                <td
-                  onClick={() => handleCellClick(cell.x, cell.y)}
-                  className="cell-on"
-                  key={cellIndex}
-                >
-                  {cell.x}
-                  {cell.y}
-                </td>
-              ) : (
-                <td
-                  className="cell-off"
-                  onClick={() => handleCellClick(cell.x, cell.y)}
-                  key={cellIndex}
-                >
-                  {cell.x}
-                  {cell.y}
-                </td>
-              )
-            )}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
-function TurnCounter() {
   const [count, setCount] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(true);
 
   useEffect(() => {
     let turn: NodeJS.Timeout;
@@ -100,6 +102,7 @@ function TurnCounter() {
     if (!paused) {
       turn = setInterval(() => {
         setCount((oldCount) => oldCount + 1);
+        // board.computeNextTurn();
       }, 1000);
     }
 
@@ -114,6 +117,36 @@ function TurnCounter() {
 
   return (
     <>
+      <table className="board">
+        <tbody>
+          {board.getBoard().map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              {row.map((cell, cellIndex) =>
+                cell.state ? (
+                  <td
+                    onClick={() => handleCellClick(cell.x, cell.y)}
+                    className="cell cell-on"
+                    key={cellIndex}
+                  >
+                    {board.countAliveNeighbours(cell.x, cell.y)}
+                    {/* {cell.x}
+                    {cell.y} */}
+                  </td>
+                ) : (
+                  <td
+                    className="cell cell-off"
+                    onClick={() => handleCellClick(cell.x, cell.y)}
+                    key={cellIndex}
+                  >
+                    {cell.x}
+                    {cell.y}
+                  </td>
+                )
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
       <div>Current turn: {count}</div>
       <button onClick={handlePause}>{paused ? "Resume" : "Pause"}</button>
     </>
@@ -125,7 +158,6 @@ export default function Home() {
     <main>
       <div className="content">
         <BoardComponent />
-        <TurnCounter />
       </div>
     </main>
   );
